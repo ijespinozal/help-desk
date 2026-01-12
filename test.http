@@ -1,0 +1,64 @@
+### 1. GET: Leer todos los tickets
+GET http://localhost:4004/odata/v4/admin/Tickets
+
+### 2. GET: Leer un ticket específico (Usa uno de los IDs que pusimos en el CSV)
+GET http://localhost:4004/odata/v4/admin/Tickets(11111111-2222-3333-4444-555555555555)
+
+### 3. GET: Leer Tickets expandiendo sus relaciones (JOIN)
+# Fíjate cómo traemos el nombre de la prioridad y el estado en la misma consulta
+GET http://localhost:4004/odata/v4/admin/Tickets?$expand=priority,status
+
+### 4. POST: Crear un Ticket Nuevo (Caso de Éxito)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Content-Type: application/json
+
+{
+    "title": "Prueba URGENTE por favor",
+    "description": "Estamos probando el día 4",
+    "priority_code": "M"
+}
+
+### 5. POST: Intentar romper el sistema (Caso de Error)
+# Intentamos enviar una prioridad 'Z' que no existe.
+# Debería devolver error 400 o 500.
+POST http://localhost:4004/odata/v4/admin/Tickets
+Content-Type: application/json
+
+{
+    "title": "Ticket Invalido",
+    "priority_code": "Z"
+}
+
+### 6. PATCH: Actualizar un Ticket (Cambiar estado a 'Cerrado')
+# Nota: Necesitamos el ID del ticket que creamos en el paso 4.
+# CAP devuelve el ID creado en la respuesta del paso 4. Copialo y pégalo aquí abajo.
+PATCH http://localhost:4004/odata/v4/admin/Tickets(TU-ID-AQUI)
+Content-Type: application/json
+
+{
+    "status_code": "C"
+}
+
+### DIA 2
+### 7. PRUEBA DE VALIDACIÓN (Debe fallar)
+# Intentamos crear un ticket URGENTE (Prioridad Alta) con descripción corta.
+# Resultado esperado: Error 400 y mensaje de error.
+POST http://localhost:4004/odata/v4/admin/Tickets
+Content-Type: application/json
+
+{
+    "title": "Fuego URGENTE", 
+    "description": "Ayuda",
+    "priority_code": "L"
+}
+
+### 8. PRUEBA DE ÉXITO (Debe funcionar)
+# Ticket Urgente con descripción larga.
+POST http://localhost:4004/odata/v4/admin/Tickets
+Content-Type: application/json
+
+{
+    "title": "Fuego URGENTE", 
+    "description": "Por favor ayuda se está quemando el servidor central de la oficina",
+    "priority_code": "L"
+}
