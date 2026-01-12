@@ -6,7 +6,7 @@ service AdminService {
     @odata.draft.enabled
     entity Tickets as projection on db.Tickets actions {
         // Definimos el botón. No devuelve nada, solo hace algo.
-        action closeTicket(); 
+        action closeTicket();  
     };
 
     // Las prioridades y estados son solo para leer (nadie crea prioridades nuevas a cada rato)

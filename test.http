@@ -62,3 +62,24 @@ Content-Type: application/json
     "description": "Por favor ayuda se está quemando el servidor central de la oficina",
     "priority_code": "L"
 }
+
+### 9. PROBAR ACCIÓN: Cerrar Ticket
+# Paso A: Necesitas un ID válido (copia el de algún ticket que hayas creado antes)
+# Paso B: La URL termina en /AdminService.closeTicket
+# Nota: Aunque no enviamos datos, el JSON vacío {} es obligatorio en Actions.
+# Fíjate que ahora especificamos ID=... y IsActiveEntity=true
+POST http://localhost:4004/odata/v4/admin/Tickets(ID=11111111-2222-3333-4444-555555555555,IsActiveEntity=true)/AdminService.closeTicket
+Content-Type: application/json
+
+{}
+
+### 10. PRUEBA DE ADVERTENCIA (Warning)
+# Debe devolver 201 Created (Éxito) PERO en la respuesta debe venir un mensaje extra.
+POST http://localhost:4004/odata/v4/admin/Tickets
+Content-Type: application/json
+
+{
+    "title": "No puedo entrar", 
+    "description": "Hola, mi contraseña es 12345 y no funciona",
+    "priority_code": "L"
+}
