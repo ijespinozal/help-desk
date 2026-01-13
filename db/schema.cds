@@ -33,6 +33,8 @@ entity Tickets : cuid, managed {
     
     // Un ticket puede tener muchos comentarios
     comments    : Composition of many Comments on comments.ticket = $self;
+
+    dueDate     : DateTime;
 }
 
 // Comentarios dentro de un ticket

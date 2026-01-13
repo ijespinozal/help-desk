@@ -49,6 +49,11 @@ annotate service.Tickets with @(
                 $Type : 'UI.DataField',
                 Label : 'Descripción',
                 Value : description
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Fecha Límite',
+                Value : dueDate
             }
         ],
         
@@ -61,7 +66,8 @@ annotate service.Tickets with @(
                 { $Type : 'UI.DataField', Value : description, Label: 'Detalle' },
                 { $Type : 'UI.DataField', Value : priority_code, Label: 'Prioridad' },
                 { $Type : 'UI.DataField', Value : status_code, Label: 'Estado' },
-                { $Type : 'UI.DataField', Value : category_code, Label: 'Categoría' }
+                { $Type : 'UI.DataField', Value : category_code, Label: 'Categoría' },
+                { $Type : 'UI.DataField', Value : dueDate, Label: 'Fecha Límite' }
             ]
         },
 

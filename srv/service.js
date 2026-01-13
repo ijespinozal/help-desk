@@ -2,12 +2,37 @@ const cds = require('@sap/cds');
 
 module.exports = cds.service.impl(async function () {
 
-    console.log("🔥🔥🔥 SERVICE.JS CARGADO 🔥🔥🔥");
     const { Tickets } = this.entities;
 
     this.before(['CREATE', 'UPDATE'], Tickets.drafts, async (req) => {
 
         const data = req.data;
+
+        // Solo calculamos si es CREATE y si viene un código de prioridad
+        if (data.priority_code) {
+            
+            const hoy = new Date();
+            let diasParaSumar = 0;
+
+            // Determinamos cuántos días sumar según la prioridad
+            if (data.priority_code === 'H') {
+                diasParaSumar = 1;
+            } else if (data.priority_code === 'M') {
+                diasParaSumar = 3;
+            } else {
+                // Para 'L' o cualquier otra cosa
+                diasParaSumar = 7;
+            }
+
+            // 1. Modificamos la fecha (esto cambia el objeto 'hoy' internamente)
+            hoy.setDate(hoy.getDate() + diasParaSumar);
+
+            // 2. Asignamos la fecha en formato ISO (YYYY-MM-DD...)
+            // Nota: No asignamos el resultado de setDate, sino el objeto 'hoy' ya modificado
+            data.dueDate = hoy.toISOString(); 
+            
+            console.log(`📅 DueDate calculado: ${data.dueDate} (Prioridad: ${data.priority_code})`);
+        }
 
         // --- LÓGICA 1: Valores por defecto (Lo que hicimos ayer) ---
         if (req.event === 'CREATE' && !data.status_code) {
@@ -65,10 +90,7 @@ module.exports = cds.service.impl(async function () {
         // Obtenemos el ID de forma segura:
         const idTicket = req.params[0].ID || req.params[0];
 
-        console.log("👉 Cerrando Ticket:", idTicket);
-
         await UPDATE(Tickets).set({ status_code: 'C' }).where({ ID: idTicket });
 
-        console.log(`✅ Ticket cerrado.`);
     });
 });
