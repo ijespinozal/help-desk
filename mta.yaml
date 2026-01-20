@@ -1,0 +1,142 @@
+_schema-version: 3.3.0
+ID: help-desk
+description: A simple CAP project.
+version: 1.0.0
+modules:
+- name: help-desk-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: help-desk-auth
+  - name: help-desk-db
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+    instances: 1
+  build-parameters:
+    builder: npm-ci
+- name: help-desk-db-deployer
+  type: hdb
+  path: gen/db
+  requires:
+  - name: help-desk-db
+  parameters:
+    buildpack: nodejs_buildpack
+- name: help-desk-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: help-desk-destination-service
+    parameters:
+      content-target: true
+  - name: help-desk_html_repo_host
+    parameters:
+      service-key:
+        name: help-desk_html_repo_host-key
+  - name: help-desk-auth
+    parameters:
+      service-key:
+        name: help-desk-auth-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: help_desk_help_desk_html_repo_host
+          ServiceInstanceName: help-desk-html5-app-host-service
+          ServiceKeyName: help-desk_html_repo_host-key
+          sap.cloud.service: help-desk
+        - Authentication: OAuth2UserTokenExchange
+          Name: help_desk_help_desk_auth
+          ServiceInstanceName: help-desk-auth
+          ServiceKeyName: help-desk-auth-key
+          sap.cloud.service: help-desk
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: help-desk-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: help-desk_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - comprojecthelpdesk.zip
+      name: comprojecthelpdesk
+      target-path: resources/
+- name: comprojecthelpdesk
+  type: html5
+  path: app/help-desk
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: help-desk-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      oauth2-configuration:
+        credential-types:
+        - binding-secret
+        - x509
+      tenant-mode: dedicated
+      xsappname: help-desk-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: help-desk-db
+  type: com.sap.xs.hdi-container
+  parameters:
+    service: hana
+    service-plan: hdi-shared
+- name: help-desk-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          - Authentication: NoAuthentication
+            HTML5.DynamicDestination: true
+            HTML5.ForwardAuthToken: true
+            Name: srv-api
+            ProxyType: Internet
+            Type: HTTP
+            URL: ~{srv-api/srv-url}
+          existing_destinations_policy: update
+      version: 1.0.0
+    service: destination
+    service-name: help-desk-destination-service
+    service-plan: lite
+  requires:
+  - name: srv-api
+- name: help-desk_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: help-desk-html5-app-host-service
+    service-plan: app-host
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+  - builder: custom
+    commands:
+    - npm ci
+    - npx cds build --production

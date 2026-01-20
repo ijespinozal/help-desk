@@ -1,0 +1,25 @@
+{
+  "xsappname": "my.helpdesk",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.User",
+      "description": "User access IE"
+    },
+    {
+      "name": "$XSAPPNAME.Support",
+      "description": "Support access IE"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "User",
+      "description": "User role",
+      "scope-references": ["$XSAPPNAME.User"]
+    },
+    {
+      "name": "Support",
+      "description": "Support role",
+      "scope-references": ["$XSAPPNAME.Support"]
+    }
+  ]
+}

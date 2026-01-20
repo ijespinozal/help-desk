@@ -1,0 +1,142 @@
+### 1. GET: Leer todos los tickets (Público - Debería fallar 401/403)
+GET http://localhost:4004/odata/v4/admin/Tickets
+
+### 2. GET: Leer un ticket específico (Alice)
+# Usamos el token de alice:123
+GET http://localhost:4004/odata/v4/admin/Tickets(11111111-2222-3333-4444-555555555555)
+Authorization: Basic YWxpY2U6MTIz
+
+### 3. GET: Leer Tickets expandiendo (Alice)
+GET http://localhost:4004/odata/v4/admin/Tickets?$expand=priority,status
+Authorization: Basic YWxpY2U6MTIz
+
+### 4. POST: Crear un Ticket Nuevo (Alice)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "Prueba URGENTE por favor",
+    "description": "Estamos probando el día 4",
+    "priority_code": "M"
+}
+
+### 5. POST: Error de Prioridad (Alice)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "Ticket Invalido",
+    "priority_code": "Z"
+}
+
+### 6. PATCH: Cerrar Ticket (Alice)
+# Reemplaza TU-ID-AQUI con el ID real del paso 4
+PATCH http://localhost:4004/odata/v4/admin/Tickets(TU-ID-AQUI)
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "status_code": "C"
+}
+
+### 7. PRUEBA DE VALIDACIÓN (Alice - Debe fallar 400)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "Fuego URGENTE", 
+    "description": "Ayuda",
+    "priority_code": "L"
+}
+
+### 8. PRUEBA DE ÉXITO (Alice - Debe funcionar)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "Fuego URGENTE", 
+    "description": "Por favor ayuda se está quemando el servidor central de la oficina",
+    "priority_code": "L"
+}
+
+### 9. ACCIÓN: Cerrar Ticket (Alice)
+# Nota: IsActiveEntity=true es obligatorio para acciones en borradores activados
+POST http://localhost:4004/odata/v4/admin/Tickets(ID=11111111-2222-3333-4444-555555555555,IsActiveEntity=true)/AdminService.closeTicket
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{}
+
+### 10. PRUEBA DE ADVERTENCIA (Alice)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "No puedo entrar", 
+    "description": "Hola, mi contraseña es 12345 y no funciona",
+    "priority_code": "L"
+}
+
+# ==========================================
+# 🛡️ ZONA DE SEGURIDAD (SEMANA 4)
+# ==========================================
+
+### 11. PRUEBA DE SUPERPODERES (Alice - Support)
+# Alice debería poder ver todo.
+# Resultado esperado: 200 OK
+GET http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+
+### 12. PRUEBA DE RESTRICCIÓN (Carol - User)
+# Carol intenta hacer algo prohibido: BORRAR un ticket.
+# Usamos el token de carol:123 (Y2Fyb2w6MTIz)
+# Resultado esperado: 403 Forbidden
+DELETE http://localhost:4004/odata/v4/admin/Tickets(ID=11111111-2222-3333-4444-555555555555,IsActiveEntity=true)
+Authorization: Basic Y2Fyb2w6MTIz
+
+### 13. PREPARACIÓN: Alice crea un ticket (Administrativo)
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+Content-Type: application/json
+
+{
+    "title": "Ticket Confidencial de Alice",
+    "description": "Solo para ojos de soporte",
+    "priority_code": "H"
+}
+
+### 14. PREPARACIÓN: Carol crea su propio ticket
+POST http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic Y2Fyb2w6MTIz
+Content-Type: application/json
+
+{
+    "title": "Ticket de Carol",
+    "description": "Este es mi problema",
+    "priority_code": "L"
+}
+
+### 15. PRUEBA DE VISIBILIDAD (Carol)
+# Resultado Esperado: Solo debería ver 1 ticket (el suyo).
+GET http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic Y2Fyb2w6MTIz
+
+### 16. PRUEBA DE VISIBILIDAD (Alice)
+# Resultado Esperado: Debería ver TODOS.
+GET http://localhost:4004/odata/v4/admin/Tickets
+Authorization: Basic YWxpY2U6MTIz
+
+### 17. PRUEBA DE DRAFTS: Leer el ticket que Alice está editando
+# Usamos el token de ALICE (YWxpY2U6MTIz) porque ella sí tiene permiso de ver este ticket.
+GET http://localhost:4004/odata/v4/admin/Tickets(ID=11111111-2222-3333-4444-555555555555,IsActiveEntity=true)
+Authorization: Basic YWxpY2U6MTIz
+
+### 18. PRUEBA DE DRAFTS: Leer el BORRADOR (Lo oculto)
+# Fíjate: IsActiveEntity=false
+GET http://localhost:4004/odata/v4/admin/Tickets(ID=11111111-2222-3333-4444-555555555555,IsActiveEntity=false)
+Authorization: Basic YWxpY2U6MTIz
