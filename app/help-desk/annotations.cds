@@ -23,6 +23,12 @@ annotate service.Tickets with @(
         // 2. Las Columnas de la Tabla (LineItem)
         LineItem : [
             {
+                $Type : 'UI.DataFieldForAction',
+                Action : 'AdminService.closeTicket', // Nombre del servicio + punto + nombre de la acción
+                Label : 'Cerrar Ticket',
+                Criticality : #Negative // Opcional: Le da color rojo al botón (o #Positive para verde)
+            },
+            {
                 $Type : 'UI.DataField',
                 Label : 'ID',
                 Value : ID,
@@ -54,6 +60,13 @@ annotate service.Tickets with @(
                 $Type : 'UI.DataField',
                 Label : 'Fecha Límite',
                 Value : dueDate
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : '¿Vencido?',
+                Value : isOverdue,
+                Criticality : overdueCriticality, // Esto pintará el texto/icono de rojo o verde
+                CriticalityRepresentation : #WithoutIcon // O #WithIcon
             }
         ],
         
@@ -88,7 +101,16 @@ annotate service.Tickets with @(
                 Label  : 'Historial de Conversación',
                 Target : 'comments/@UI.LineItem' // <--- Apunta a la relación 'comments'
             }
-        ]
+        ],
+
+        Identification : [
+            {
+                $Type : 'UI.DataFieldForAction',
+                Action : 'AdminService.closeTicket',
+                Label : 'Cerrar Ticket Confirmado',
+                Criticality : #Negative
+            }
+        ],
     }
 );
 
@@ -180,3 +202,11 @@ annotate service.Comments with @(
         }
     }
 );
+
+// SIDE EFFECTS
+annotate service.Tickets @(Common : {
+    SideEffects #PriorityChanged : {
+        SourceProperties : ['priority_code'],
+        TargetProperties : ['dueDate']
+    }
+});

@@ -3,9 +3,24 @@ using my.helpdesk as db from '../db/schema';
 service AdminService @(requires: 'authenticated-user') {
     
     @odata.draft.enabled
-    entity Tickets as projection on db.Tickets actions {
-        action closeTicket();
-    } 
+    entity Tickets as projection on db.Tickets {
+        *, // Trae todos los campos originales
+        
+        // CAMPOS VIRTUALES (No se guardan en BD)
+        virtual null as isOverdue : Boolean,
+        virtual 0    as overdueCriticality : Integer // 3=Verde, 1=Rojo
+    } actions {
+        //SIDE EFFECTS PARA BOTONES
+        @( cds.odata.bindingparameter.name : '_it',
+        Common.SideEffects : {
+            TargetProperties : [
+                '_it/status_code', 
+                '_it/status'
+            ]
+        } ) 
+        action closeTicket(); 
+
+    };
     // 2. Reglas de Acceso (ACL)
     annotate Tickets with @(restrict: [
         // ------------------------------------------------------
