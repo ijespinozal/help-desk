@@ -25,8 +25,26 @@
   "private": true,
   "cds": {
     "requires": {
-      "[production]": {
-        "auth": "xsuaa"
+      "db": {
+        "kind": "sqlite",
+        "[hybrid]": { "kind": "hana" },
+        "[production]": { "kind": "hana" }
+      },
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "alice": {
+            "password": "admin",
+            "roles": ["Support", "Admin"]
+          },
+          "carol": {
+            "password": "user",
+            "roles": ["User"]
+          }
+        },
+        "[production]": {
+          "kind": "xsuaa" 
+        }
       }
     }
   },
