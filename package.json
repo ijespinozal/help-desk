@@ -45,6 +45,14 @@
         "[production]": {
           "kind": "xsuaa" 
         }
+      },
+      "sap_api_ias": {
+        "kind": "rest",
+        "credentials": {
+          "destination": "SAP_API_IAS",
+          "path": "/scim",
+          "requestTimeout": 30000
+        }
       }
     }
   },

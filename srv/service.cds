@@ -50,5 +50,7 @@ service AdminService @(requires: 'authenticated-user') {
     entity Statuses as projection on db.Statuses;
 
     @readonly
-    entity Categories as projection on db.Categories
+    entity Categories as projection on db.Categories;
+    
+    action getExportDataIAS(ids: array of String) returns String;
 }
